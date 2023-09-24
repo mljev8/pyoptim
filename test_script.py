@@ -13,17 +13,18 @@ alpha = 0.01
 beta = 0.5
 
 y = np.loadtxt('test_data.csv')
+y = np.concatenate([y for _ in range(3)])
 n = len(y)
 
 A = denoise.ATV_denoise()
-#A._verbose = False
-x = A.denoise(y, mu=mu)
+A._verbose = False
+x = A.denoise(y, mu=1e3)
 
 # visualize
 plt.close('all')
 fig,ax = plt.subplots()
-ax.plot(y, label='input')
-ax.plot(x, label=f'denoised (mu={A._mu:.1f})')
+ax.plot(np.arange(n), y, label='input')
+ax.plot(np.arange(n), x, label=f'denoised (mu={A._mu:.1f})')
 ax.legend(loc=0)
 
 """

@@ -1,19 +1,7 @@
 import numpy as np
+#import utils
+import utils_cython as utils
 
-def tridiagonal_solve(a, b, c, d):
-    # wikipedia.org/wiki/Tridiagonal_matrix_algorithm
-    # all four inputs are length-n 1D numpy arrays
-    # a[n-1] and c[0] are not used (undefined)
-    n = len(d)
-    bb = b.copy() # avoid destroying input
-    dd = d.copy()
-    for i in range(n-1):
-        frac = a[i]/bb[i]
-        dd[i+1] -= dd[i] * frac
-        bb[i+1] -=  c[i] * frac
-    for i in range(n-2,-1,-1): # reversed
-        dd[i] -= (dd[i+1] * c[i]) / bb[i+1]
-    return dd / bb
 
 class ATV_denoise():
     """ 
@@ -86,20 +74,10 @@ class ATV_denoise():
             temp_h = z*z + eps*eps
             return np.sqrt(temp_h) / (1.-((z*z)/temp_h))
         
-        def tridiag_solve(b, d): # specialization with a = c = -0.5
-            n = len(d)
-            for i in range(n-1):
-                frac = -0.5/b[i]
-                d[i+1] -= d[i] * frac
-                b[i+1] -=  -0.5 * frac
-            for i in range(n-1,0,-1): # reversed
-                d[i-1] -= (d[i] * -0.5) / b[i]
-            return d / b
-        
         if(self._mu == 0.): 
             return 0.5*nabla # handle the non-penalized case
         inv_diag = (1./self._mu) * inverse_hessian_h(np.diff(x), self._eps)        
-        temp = tridiag_solve(1. + inv_diag, np.diff(nabla))
+        temp = utils.tridiag_solve_specialcase(1. + inv_diag, np.diff(nabla))
         return 0.5*nabla - 0.25*self._A_top(temp)
 
     @staticmethod
