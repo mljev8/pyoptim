@@ -2,7 +2,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-import denoise
+import trending
+
+y = np.loadtxt('test_data.csv')
+y = np.concatenate([((-1)**i)*y for i in range(3)])
+n = len(y)
+
+# quick test
+HP = trending.HodrickPrescottFiltering(n=n)
+x1 = HP.filter_fixed(y)
+x2 = HP.filter(y)
+
+
+# Denoising
 
 # parameters
 eps = 0.001
@@ -12,11 +24,7 @@ mu = 500.
 alpha = 0.01
 beta = 0.5
 
-y = np.loadtxt('test_data.csv')
-y = np.concatenate([y for _ in range(3)])
-n = len(y)
-
-A = denoise.ATV_denoise()
+A = trending.ATV_denoise()
 A._verbose = False
 x = A.denoise(y, mu=1e3)
 
